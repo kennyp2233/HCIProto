@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-function Tabla({ matriz, columnas, reglas = [] }) {
+function Tabla({ matriz, columnas, reglas = [], handleOnClick = () => { } }) {
     // Sincroniza el estado de filtros con el tamaño de columnas
     const [filtros, setFiltros] = useState(Array(columnas.length).fill(''));
 
     useEffect(() => {
         setFiltros(Array(columnas.length).fill(''));
     }, [columnas]);
-
 
     // Filtra los datos basándote en las reglas y filtros
     const datosFiltrados = matriz.filter((fila) => {
@@ -18,13 +17,12 @@ function Tabla({ matriz, columnas, reglas = [] }) {
             return !reglas[index] || valorLower.includes(filtro);
         });
     });
+
     const manejarCambioFiltro = (index, valor) => {
         const nuevosFiltros = [...filtros];
         nuevosFiltros[index] = valor;
         setFiltros(nuevosFiltros);
     };
-
-
 
     return (
         <div className="overflow-x-auto">
@@ -32,32 +30,36 @@ function Tabla({ matriz, columnas, reglas = [] }) {
                 <thead>
                     <tr>
                         {columnas.map((columna, index) => (
-                            <th key={index}>
-                                <div className="mb-2">{columna}</div>
-                                {reglas[index] && (
-                                    <input
-                                        type="text"
-                                        className="input input-bordered placeholder-normal input-sm w-full max-w-xs"
-                                        placeholder={`Filtrar ${columna}`}
-                                        value={filtros[index]}
-                                        onChange={(e) => manejarCambioFiltro(index, e.target.value)}
-                                    />
-
-                                )}
-                            </th>
+                            // Solo mostrar columnas si hay una regla definida
+                            reglas[index] !== undefined && (
+                                <th key={index}>
+                                    <div className="mb-2">{columna}</div>
+                                    {reglas[index] && (
+                                        <input
+                                            type="text"
+                                            className="input input-bordered placeholder-normal input-sm w-full max-w-xs"
+                                            placeholder={`Filtrar ${columna}`}
+                                            value={filtros[index]}
+                                            onChange={(e) => manejarCambioFiltro(index, e.target.value)}
+                                        />
+                                    )}
+                                </th>
+                            )
                         ))}
                     </tr>
                 </thead>
                 <tbody>
                     {datosFiltrados.map((fila, index) => (
-                        <tr key={index}>
-                            {fila.map((columna, index) => (
-                                <td key={index}>{columna}</td>
+                        <tr key={index} className="hover" onClick={() => handleOnClick(fila[0])}>
+                            {fila.map((valor, index) => (
+                                // Solo mostrar celdas si hay una regla definida
+                                reglas[index] !== undefined && (
+                                    <td key={index}>{valor}</td>
+                                )
                             ))}
                         </tr>
                     ))}
                 </tbody>
-
             </table>
         </div>
     );
